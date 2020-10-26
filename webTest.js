@@ -76,6 +76,60 @@ function getRouteLength(stopList) {
 }
 
 
+//Finds the routes between the first and last stop with routes
+//having a max length of maxLength. If restricted, we want paths
+//that are only of maxLength
+function findRoutes(firstStop, lastStop, maxLength, restricted=false) {
+  //Queue, push to back, pop from front
+  //Since we want to track the limits, create object with iteration
+  let queue = [];
+  queue.push({node: firstStop, iteration: 1});
+  let count = 0;
+
+  while (queue.length > 0) {
+    const {node, iteration} = queue.shift();
+    if (iteration > maxLength) return count;
+    if (node == lastStop) {
+      if (!restricted || (iteration == maxLength)) {
+        count += 1
+      }
+    }
+    const neighbours = getNeighbors(node);
+    for (let i = 0; i < neighbours.length; i++) {
+      queue.push({node: neighbours[i], iteration: iteration + 1})
+    }
+  }
+}
+
+
+//Finds the shortest length route between two stops
+function findShortestRoute(firstStop, lastStop) {
+  //Here we just use simple bfs
+}
+
+
+//Finds all routes under a certain distance between a and b
+function findPathsUnder(firstStop, lastStop, maxDistance) {
+
+}
+
+function getNeighbors(letter) {
+  neighbours = [];
+  for (let i = 0; i < adjMatrix.length; i++) {
+    if (adjMatrix[letter.charCodeAt(0) - 65][i] != -1) {
+      neighbours.push(String.fromCharCode(i + 65));
+    }
+  }
+  return neighbours;
+}
+
+//Here we need to find all paths 
+function performBFS(start, end, limit) {
+
+}
+
+
+
 parseFile('test.txt');
 
 async function runCode() {
@@ -86,39 +140,22 @@ async function runCode() {
   console.log("Loaded");
   console.log(adjMatrix);
 
-  console.log("TEST 1:");
-  console.log(getRouteLength(['A', 'B', 'C']));
-  console.log("TEST 2:");
-  console.log(getRouteLength(['A', 'D']));
-  console.log("TEST 3:");
-  console.log(getRouteLength(['A', 'D', 'C']));
-  console.log("TEST 4:");
-  console.log(getRouteLength(['A', 'E', 'B', 'C', 'D']));
-  console.log("TEST 5:");
-  console.log(getRouteLength(['A', 'E', 'D']));
+  // console.log("TEST 1:");
+  // console.log(getRouteLength(['A', 'B', 'C']));
+  // console.log("TEST 2:");
+  // console.log(getRouteLength(['A', 'D']));
+  // console.log("TEST 3:");
+  // console.log(getRouteLength(['A', 'D', 'C']));
+  // console.log("TEST 4:");
+  // console.log(getRouteLength(['A', 'E', 'B', 'C', 'D']));
+  // console.log("TEST 5:");
+  // console.log(getRouteLength(['A', 'E', 'D']));
+  console.log("TEST 6:");
+  console.log(findRoutes('C', 'C', 3));
+  console.log("TEST 7:");
+  console.log(findRoutes('A', 'C', 5, true));
 
 }
 
 runCode();
 
-
-
-
-//Finds the routes between the first and last stop with routes
-//having a max length of maxLength. If restricted, we want paths
-//that are only of maxLength
-function findRoutes(firstStop, lastStop, maxLength, restricted) {
-
-}
-
-
-//Finds the shortest length route between two stops
-function findShortestRoute(firstStop, lastStop) {
-
-}
-
-
-//Finds all routes under a certain distance between a and b
-function findPathsUnder(firstStop, lastStop, maxDistance) {
-
-}
