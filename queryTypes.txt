@@ -1,0 +1,17 @@
+Query types:
+
+1) Direct ([stopA, stopB, stopC, ...]]) - Gets the distance of the route from stopA to stopB if it exists
+2) TripsMax (stopA, stopB, maxStops) - Gets the number of trips possible from stopA to stopB with a maximum of maxStops maxStops
+3) TripsExact (stopA, stopB, stops) - Gets the number of trips possible from stopA to stopB with exactly stops stops
+4) ShortestLength (stopA, stopB) - Gets the minimum distance possible between stopA and stopB
+5) AllPathsBelow (stopA, stopB, maxDistance) - Gets the amount of paths possible between stopA and stopB in under maxDistance distance
+
+Example in a txt file:
+
+1) "Direct A B C D"
+2) "TripsMax A B 2"
+3) "Trips Exact A B 2"
+4) "ShortestLength A B"
+5) "AllPathsBelow A B 30"
+
+

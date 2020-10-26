@@ -222,7 +222,6 @@ async function runCode() {
 
 }
 
-//runCode();
 
 
 const readline = require('readline').createInterface({
@@ -241,7 +240,7 @@ async function runCLI() {
     const selectionString = `
     Healthcare Logic Graph Traversal CLI\n
     (l) -> Load data from a text file\n
-    (q) -> Run a query on the data\n
+    (q) -> Perform queries from text file\n
     (x) -> Exit the CLI\n
     Choose an option: `;
   
@@ -266,18 +265,41 @@ async function runCLI() {
         break;
       }
       if (response == 'l') {
-        await loadFile()
+        await loadFile();
         await (sleep(1500));
       };
-      if (response == 'q') console.log("Preparing query");
+      if (response == 'q') {
+        if (adjMatrix.length == 0) {
+          console.log("\n    You need to add data first!");
+          continue;
+        }
+        await performTestQueries();
+        await (sleep(4000));
+      }
     }
   
   }
 
 }
 
-async function performQuery() {
-  
+async function performTestQueries() {
+  let asking = true; 
+
+  const selectionString = `\n    Enter the filename: `;
+
+  response = '';
+
+  readline.question(selectionString, option => {
+    response = option;
+    asking = false;
+  });
+
+  while(asking) {
+    await sleep(500);
+  }
+
+  parseQueryFile(response);
+
 }
 
 async function loadFile() {
@@ -303,3 +325,64 @@ async function loadFile() {
 
 runCLI();
 
+
+
+async function parseQueryFile(fileName) {
+
+  await fs.readFile(`./${fileName}`, 'utf8', (err, data) => {
+    if (err) {
+      console.log("    ERROR: File could not be loaded");
+    }
+
+    //Get a list similar to the inputs, then create matrix
+    const lines = data.split('\r\n');
+
+    const acceptableQueryTypes = ['Direct', 'TripsMax', 'TripsExact', 'ShortestLength', 'AllPathsBelow'];
+    for (let i = 0; i < lines.length; i++) {
+      const lineParts = lines[i].split(' ');
+      if (!acceptableQueryTypes.includes(lineParts[0])) {
+        console.log("    ERROR: Incorrect Query File Format");
+        return;
+      }
+      runQuery(lineParts[0], lineParts.slice(1));
+    }
+  })
+}
+
+function runQuery(type, params) {
+  
+  if (type == 'Direct') {
+    console.log(`Testing direct path from ${params[0]} to ${params[params.length - 1]}`);
+    console.log(getRouteLength(params));
+  }
+
+  if (type == 'TripsMax') {
+    console.log(`Testing trips max from ${params[0]} to ${params[1]} with max stops ${params[2]}`);
+    console.log(findRoutes(params[0], params[1], params[2]));
+  }
+
+  if (type == 'TripsExact') {
+    console.log(`Testing trips exact from ${params[0]} to ${params[1]} with exact stops ${params[2]}`);
+    console.log(findRoutes(params[0], params[1], parseInt(params[2])+1, true));
+  }
+
+  if (type == 'ShortestLength') {
+    console.log(`Testing for the shortest path between ${params[0]} and ${params[1]}`);
+    console.log(findLowestCost(params[0], params[1]));
+  }
+
+  if (type == 'AllPathsBelow') {
+    console.log(`Finding all paths below ${params[2]} cost between ${params[0]} and ${params[1]}`);
+    console.log(findPathsUnder(params[0], params[1], params[2]));
+  }
+  return;
+}
+
+async function tryQueries() {
+  parseFile('test.txt');
+  await sleep(2000);
+  parseQueryFile('queries.txt');
+  return;
+}
+
+//tryQueries();
