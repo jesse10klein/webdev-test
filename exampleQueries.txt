@@ -1,0 +1,8 @@
+Direct A B C
+Direct A D
+Direct A B C D E F G H
+Direct A E D
+AllPathsBelow A H 100
+TripsMax A D 10
+TripsExact A E 3
+ShortestLength A D

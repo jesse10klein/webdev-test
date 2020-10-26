@@ -10,10 +10,12 @@ let loaded = false;
   to represent the directional graph
 */
 
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+//Parses a data file
 async function parseFile(fileName) {
 
   await fs.readFile(`./${fileName}`, 'utf8', (err, data) => {
@@ -39,6 +41,7 @@ async function parseFile(fileName) {
 
 }
 
+//Creates an adjacency matrix to represent the graph based on the parsed file
 function createAdjacencyMatrix(parts, distinctCount) {
   adjMatrix = [];
 
@@ -61,8 +64,7 @@ function createAdjacencyMatrix(parts, distinctCount) {
   loaded = true;
 }
 
-//Takes a list of stops [A, B, C, D] etc and checks if there's a 
-//route between them checks length, if not prints "NO SUCH ROUTE"
+//Takes a list of stops [A, B, C, D] etc and checks if there's a route between them. checks length, if not prints "NO SUCH ROUTE"
 function getRouteLength(stopList) {
   
   let totalDistance = 0;
@@ -78,12 +80,9 @@ function getRouteLength(stopList) {
 }
 
 
-//Finds the routes between the first and last stop with routes
-//having a max length of maxLength. If restricted, we want paths
-//that are only of maxLength
+//Finds the routes between the first and last stop with routes having a max length of maxLength. If restricted, we want paths that are only of maxLength
 function findRoutes(firstStop, lastStop, maxLength, restricted=false) {
-  //Queue, push to back, pop from front
-  //Since we want to track the limits, create object with iteration
+
   let queue = [];
   queue.push({node: firstStop, iteration: 1});
   let count = 0;
@@ -104,12 +103,14 @@ function findRoutes(firstStop, lastStop, maxLength, restricted=false) {
   return count;
 }
 
+//Gets the cost of moving from one stop to another
 function getCost(firstStop, secondStop) {
   const firstIndex = firstStop.charCodeAt(0) - 65;
   const secondIndex = secondStop.charCodeAt(0) - 65;
   return adjMatrix[firstIndex][secondIndex];
 }
 
+//Checks if all costs in the queue are above a certain cost (to prove we have the lowest cost path)
 function checkCosts(queue, curLowest) {
   if (queue.length == 0) return true;
   for (let i = 0; i < queue.length; i++) {
@@ -181,6 +182,7 @@ function findPathsUnder(firstStop, lastStop, maxDistance) {
   return count;
 }
 
+//Given a node, gets the connected to the initial node
 function getNeighbors(letter) {
   neighbours = [];
   for (let i = 0; i < adjMatrix.length; i++) {
@@ -191,44 +193,13 @@ function getNeighbors(letter) {
   return neighbours;
 }
 
-async function runCode() {
-  while (!loaded) {
-    await sleep(500);
-  }
-
-  console.log("Loaded");
-  console.log(adjMatrix);
-
-  console.log("TEST 1:");
-  console.log(getRouteLength(['A', 'B', 'C']));
-  console.log("TEST 2:");
-  console.log(getRouteLength(['A', 'D']));
-  console.log("TEST 3:");
-  console.log(getRouteLength(['A', 'D', 'C']));
-  console.log("TEST 4:");
-  console.log(getRouteLength(['A', 'E', 'B', 'C', 'D']));
-  console.log("TEST 5:");
-  console.log(getRouteLength(['A', 'E', 'D']));
-  console.log("TEST 6:");
-  console.log(findRoutes('C', 'C', 3));
-  console.log("TEST 7:");
-  console.log(findRoutes('A', 'C', 5, true));
-  console.log("TEST 8:");
-  console.log(findLowestCost('A', 'C'));
-  console.log("TEST 9:");
-  console.log(findLowestCost('B', 'B'));
-  console.log("TEST 10:");
-  console.log(findPathsUnder('C', 'C', 30));
-
-}
-
-
 
 const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
+//Starts the application, user gives input to run queries and load data
 async function runCLI() {
 
   const validResponses = ['l', 'q', 'x'];
@@ -238,10 +209,10 @@ async function runCLI() {
     let asking = true; 
 
     const selectionString = `
-    Healthcare Logic Graph Traversal CLI\n
-    (l) -> Load data from a text file\n
-    (q) -> Perform queries from text file\n
-    (x) -> Exit the CLI\n
+    Healthcare Logic Graph Traversal CLI
+    (l) -> Load data from a text file
+    (q) -> Perform queries from text file
+    (x) -> Exit the CLI
     Choose an option: `;
   
     response = '';
@@ -282,6 +253,7 @@ async function runCLI() {
 
 }
 
+//Loads a file the user gives, then runs the queries outlined in that file
 async function performTestQueries() {
   let asking = true; 
 
@@ -302,6 +274,7 @@ async function performTestQueries() {
 
 }
 
+//Loads a data file with the name given by the user
 async function loadFile() {
 
   let asking = true; 
@@ -323,10 +296,7 @@ async function loadFile() {
 
 }
 
-runCLI();
-
-
-
+//Loads a query file, separates the queries and runs each one
 async function parseQueryFile(fileName) {
 
   await fs.readFile(`./${fileName}`, 'utf8', (err, data) => {
@@ -349,40 +319,35 @@ async function parseQueryFile(fileName) {
   })
 }
 
+//Runs a given query
 function runQuery(type, params) {
   
   if (type == 'Direct') {
-    console.log(`Testing direct path from ${params[0]} to ${params[params.length - 1]}`);
-    console.log(getRouteLength(params));
+    console.log(`    Testing direct path from ${params[0]} to ${params[params.length - 1]}`);
+    console.log('    Answer: ' + getRouteLength(params));
   }
 
   if (type == 'TripsMax') {
-    console.log(`Testing trips max from ${params[0]} to ${params[1]} with max stops ${params[2]}`);
-    console.log(findRoutes(params[0], params[1], params[2]));
+    console.log(`    Testing trips max from ${params[0]} to ${params[1]} with max stops ${params[2]}`);
+    console.log('    Answer: ' + findRoutes(params[0], params[1], params[2]));
   }
 
   if (type == 'TripsExact') {
-    console.log(`Testing trips exact from ${params[0]} to ${params[1]} with exact stops ${params[2]}`);
-    console.log(findRoutes(params[0], params[1], parseInt(params[2])+1, true));
+    console.log(`    Testing trips exact from ${params[0]} to ${params[1]} with exact stops ${params[2]}`);
+    console.log('    Answer: ' + findRoutes(params[0], params[1], parseInt(params[2])+1, true));
   }
 
   if (type == 'ShortestLength') {
-    console.log(`Testing for the shortest path between ${params[0]} and ${params[1]}`);
-    console.log(findLowestCost(params[0], params[1]));
+    console.log(`    Testing for the shortest path between ${params[0]} and ${params[1]}`);
+    console.log('    Answer: ' + findLowestCost(params[0], params[1]));
   }
 
   if (type == 'AllPathsBelow') {
-    console.log(`Finding all paths below ${params[2]} cost between ${params[0]} and ${params[1]}`);
-    console.log(findPathsUnder(params[0], params[1], params[2]));
+    console.log(`    Finding all paths below ${params[2]} cost between ${params[0]} and ${params[1]}`);
+    console.log('    Answer: ' + findPathsUnder(params[0], params[1], params[2]));
   }
+  console.log('\n');
   return;
 }
 
-async function tryQueries() {
-  parseFile('test.txt');
-  await sleep(2000);
-  parseQueryFile('queries.txt');
-  return;
-}
-
-//tryQueries();
+runCLI();

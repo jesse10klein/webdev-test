@@ -1,3 +1,14 @@
+TO RUN THE PROGRAM:
+node webTest.js
+
+TO RUN THE OFFICIAL TEST:
+node webTest.js
+l
+officialTest.txt
+q
+officialQueries.txt
+
+
 Query types:
 
 1) Direct ([stopA, stopB, stopC, ...]]) - Gets the distance of the route from stopA to stopB if it exists
