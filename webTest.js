@@ -10,11 +10,14 @@ let loaded = false;
   to represent the directional graph
 */
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function parseFile(fileName) {
 
   fs.readFile(`./${fileName}`, 'utf8', (err, data) => {
-    if (err) return console.log(err);
+    if (err) console.log(err);
 
     //Get a list similar to the inputs, then create matrix
     const parts = data.split('\r\n');
@@ -34,7 +37,6 @@ function parseFile(fileName) {
 }
 
 function createAdjacencyMatrix(parts, distinctCount) {
-  console.log("ET")
   //Start off by making a matrix n*n initialised to -1
   for (let i = 0; i < distinctCount; i++) {
     adjMatrix.push([]);
@@ -52,16 +54,12 @@ function createAdjacencyMatrix(parts, distinctCount) {
     adjMatrix[stopAIndex][stopBIndex] = distance;
   }
   loaded = true;
-  console.log("Loaded :)")
 }
 
 //Takes a list of stops [A, B, C, D] etc and checks if there's a 
 //route between them checks length, if not prints "NO SUCH ROUTE"
 function getRouteLength(stopList) {
   
-  console.log("HERE");
-  console.log(adjMatrix);
-
   let totalDistance = 0;
 
   for (let i = 1; i < stopList.length; i++) {
@@ -77,7 +75,33 @@ function getRouteLength(stopList) {
   return totalDistance;
 }
 
+
 parseFile('test.txt');
+
+async function runCode() {
+  while (!loaded) {
+    await sleep(500);
+  }
+
+  console.log("Loaded");
+  console.log(adjMatrix);
+
+  console.log("TEST 1:");
+  console.log(getRouteLength(['A', 'B', 'C']));
+  console.log("TEST 2:");
+  console.log(getRouteLength(['A', 'D']));
+  console.log("TEST 3:");
+  console.log(getRouteLength(['A', 'D', 'C']));
+  console.log("TEST 4:");
+  console.log(getRouteLength(['A', 'E', 'B', 'C', 'D']));
+  console.log("TEST 5:");
+  console.log(getRouteLength(['A', 'E', 'D']));
+
+}
+
+runCode();
+
+
 
 
 //Finds the routes between the first and last stop with routes
