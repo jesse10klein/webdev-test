@@ -14,10 +14,12 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function parseFile(fileName) {
+async function parseFile(fileName) {
 
-  fs.readFile(`./${fileName}`, 'utf8', (err, data) => {
-    if (err) console.log(err);
+  await fs.readFile(`./${fileName}`, 'utf8', (err, data) => {
+    if (err) {
+      console.log("    ERROR: File could not be loaded");
+    }
 
     //Get a list similar to the inputs, then create matrix
     const parts = data.split('\r\n');
@@ -32,11 +34,14 @@ function parseFile(fileName) {
     }
 
     createAdjacencyMatrix(parts, unique.length);
+    console.log("    File loaded successfully");
   })
 
 }
 
 function createAdjacencyMatrix(parts, distinctCount) {
+  adjMatrix = [];
+
   //Start off by making a matrix n*n initialised to -1
   for (let i = 0; i < distinctCount; i++) {
     adjMatrix.push([]);
@@ -186,9 +191,6 @@ function getNeighbors(letter) {
   return neighbours;
 }
 
-
-parseFile('test.txt');
-
 async function runCode() {
   while (!loaded) {
     await sleep(500);
@@ -220,5 +222,84 @@ async function runCode() {
 
 }
 
-runCode();
+//runCode();
+
+
+const readline = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+async function runCLI() {
+
+  const validResponses = ['l', 'q', 'x'];
+
+  while (true) {
+    
+    let asking = true; 
+
+    const selectionString = `
+    Healthcare Logic Graph Traversal CLI\n
+    (l) -> Load data from a text file\n
+    (q) -> Run a query on the data\n
+    (x) -> Exit the CLI\n
+    Choose an option: `;
+  
+    response = '';
+  
+    readline.question(selectionString, option => {
+      response = option;
+      asking = false;
+    });
+  
+    
+    while(asking) {
+      await sleep(500);
+    }
+
+    if (!validResponses.includes(response)) {
+      console.log(`\n\n    ${response} is an invalid command, please try again.`);
+    } else {
+      if (response == 'x') {
+        console.log("    EXITING APPLICATION\n");
+        readline.close();
+        break;
+      }
+      if (response == 'l') {
+        await loadFile()
+        await (sleep(1500));
+      };
+      if (response == 'q') console.log("Preparing query");
+    }
+  
+  }
+
+}
+
+async function performQuery() {
+  
+}
+
+async function loadFile() {
+
+  let asking = true; 
+
+  const selectionString = `\n    Enter the filename: `;
+
+  response = '';
+
+  readline.question(selectionString, option => {
+    response = option;
+    asking = false;
+  });
+
+  while(asking) {
+    await sleep(500);
+  }
+
+  parseFile(response);
+
+}
+
+runCLI();
 
