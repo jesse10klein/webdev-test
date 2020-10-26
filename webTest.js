@@ -66,10 +66,7 @@ function getRouteLength(stopList) {
     const stopAIndex = stopList[i-1].charCodeAt(0) - 65;
     const stopBIndex = stopList[i].charCodeAt(0) - 65;
     const distance = adjMatrix[stopAIndex][stopBIndex];
-    if (distance == -1) {
-      console.log("NO SUCH ROUTE");
-      return;
-    }
+    if (distance == -1) return "NO SUCH ROUTE";
     totalDistance += distance;
   }
   return totalDistance;
@@ -99,18 +96,84 @@ function findRoutes(firstStop, lastStop, maxLength, restricted=false) {
       queue.push({node: neighbours[i], iteration: iteration + 1})
     }
   }
+  return count;
 }
 
+function getCost(firstStop, secondStop) {
+  const firstIndex = firstStop.charCodeAt(0) - 65;
+  const secondIndex = secondStop.charCodeAt(0) - 65;
+  return adjMatrix[firstIndex][secondIndex];
+}
+
+function checkCosts(queue, curLowest) {
+  if (queue.length == 0) return true;
+  for (let i = 0; i < queue.length; i++) {
+    if (queue[i].cost <= curLowest) return true;
+  }
+  return false;
+}
 
 //Finds the shortest length route between two stops
-function findShortestRoute(firstStop, lastStop) {
-  //Here we just use simple bfs
-}
+function findLowestCost(firstStop, lastStop) {
+  //Need to use BFS, but also take into account the weights
+  //Simply, just keep going until all weights in the queue are above the lowest found
+  let queue = [];
+  queue.push({node: firstStop, cost: 0});
+  let currentLowest = 0;
 
+  while (queue.length > 0) {
+    const {node, cost} = queue.shift();
+    
+
+    if (node == lastStop && (cost < currentLowest || currentLowest == 0)) {
+      currentLowest = cost;
+    }
+
+    //Exit condition
+    if (currentLowest != 0 && !checkCosts(queue, currentLowest)) return currentLowest;
+
+    const neighbours = getNeighbors(node);
+    for (let i = 0; i < neighbours.length; i++) {
+      queue.push({
+        node: neighbours[i], 
+        cost: cost + getCost(node, neighbours[i])
+      })
+    }
+
+  }
+  return currentLowest;
+}
 
 //Finds all routes under a certain distance between a and b
 function findPathsUnder(firstStop, lastStop, maxDistance) {
+  
+  let count = 0;
+  let queue = [];
+  queue.push({node: firstStop, cost: 0});
 
+  while (queue.length > 0) {
+    const {node, cost} = queue.shift();
+
+    if (!cost == 0 && node == lastStop && cost < maxDistance) {
+      count++;
+    }
+
+    //Exit condition
+    if (!checkCosts(queue, maxDistance)) return count;
+
+    const neighbours = getNeighbors(node);
+    for (let i = 0; i < neighbours.length; i++) {
+      queue.push({
+        node: neighbours[i], 
+        cost: cost + getCost(node, neighbours[i])
+      })
+    }
+
+    //Clean list
+    queue = queue.filter((elem) => elem.cost <= maxDistance);
+
+  }
+  return count;
 }
 
 function getNeighbors(letter) {
@@ -123,12 +186,6 @@ function getNeighbors(letter) {
   return neighbours;
 }
 
-//Here we need to find all paths 
-function performBFS(start, end, limit) {
-
-}
-
-
 
 parseFile('test.txt');
 
@@ -140,20 +197,26 @@ async function runCode() {
   console.log("Loaded");
   console.log(adjMatrix);
 
-  // console.log("TEST 1:");
-  // console.log(getRouteLength(['A', 'B', 'C']));
-  // console.log("TEST 2:");
-  // console.log(getRouteLength(['A', 'D']));
-  // console.log("TEST 3:");
-  // console.log(getRouteLength(['A', 'D', 'C']));
-  // console.log("TEST 4:");
-  // console.log(getRouteLength(['A', 'E', 'B', 'C', 'D']));
-  // console.log("TEST 5:");
-  // console.log(getRouteLength(['A', 'E', 'D']));
+  console.log("TEST 1:");
+  console.log(getRouteLength(['A', 'B', 'C']));
+  console.log("TEST 2:");
+  console.log(getRouteLength(['A', 'D']));
+  console.log("TEST 3:");
+  console.log(getRouteLength(['A', 'D', 'C']));
+  console.log("TEST 4:");
+  console.log(getRouteLength(['A', 'E', 'B', 'C', 'D']));
+  console.log("TEST 5:");
+  console.log(getRouteLength(['A', 'E', 'D']));
   console.log("TEST 6:");
   console.log(findRoutes('C', 'C', 3));
   console.log("TEST 7:");
   console.log(findRoutes('A', 'C', 5, true));
+  console.log("TEST 8:");
+  console.log(findLowestCost('A', 'C'));
+  console.log("TEST 9:");
+  console.log(findLowestCost('B', 'B'));
+  console.log("TEST 10:");
+  console.log(findPathsUnder('C', 'C', 30));
 
 }
 
